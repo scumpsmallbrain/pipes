@@ -1,5 +1,8 @@
 # Pipe Problem
 
+![pipes](https://github.com/scumpsmallbrain/pipes/assets/136015437/774716d5-2b81-405d-93d5-5d660fd989d5)
+
+
 *v0.0.1*
 
 pipe problem is a logic puzzle devised by my buddy will. there are 7 pipes. each pipe can be empty, represented by 0, half-full, represented by 1, or full, represented by 2.
