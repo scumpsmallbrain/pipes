@@ -1,5 +1,16 @@
 package main
-import ("fmt")
+import (
+	"fmt"
+	col "github.com/gookit/color"
+	kb "atomicgo.dev/keyboard"
+	"atomicgo.dev/keyboard/keys"
+)	
+
+var graphics = [...]rune {
+	'░',
+	'▄',
+	'█',
+}
 
 type pipe struct {
 	state uint8;
@@ -18,30 +29,8 @@ func main() {
 	for i := (uint8)(1); i < (uint8)(len(states)); i++ {
 		pipes.append(pipe{state: states[i]});
 	}
-	for {
-		pipes.print()
-		var command string;
-		fmt.Scanln(&command);
-		if command[0] == 'q' { break }
-		p := look_for_pipe(command[0], &pipes);
-		if p == nil { continue }
-
-		switch (command[1]) {
-		case '+':
-			p.plus();
-		case '-':
-			p.minus();
-		}
-	}
-}
-
-func look_for_pipe(s byte, pl *pipe_list) *pipe {
-	t := (int)(s) - 97;
-	p := pl.head;
-	for i := 0; i != t && p != nil; i++ {
-		p = p.next;
-	}
-	return p;
+	cursor_focus := pipes.head;
+	pipes.display(cursor_focus)
 }
 
 func (pi *pipe_list) append(p pipe) {
@@ -51,16 +40,78 @@ func (pi *pipe_list) append(p pipe) {
 	p.last = last_tail;
 }
 
-func (pi *pipe_list) print() {
-	fmt.Println();
-	var i int = 0;
-	for p:= *pi.head;; p = *p.next {
-		fmt.Printf(" %c \033[1B\033[3D", (rune)(i + 97))
-		fmt.Printf(" %d \033[1A", p.state);
-		i++;
-		if p == *pi.tail { break }
+func (pi *pipe_list) display(cursor *pipe) bool {
+	//show cursor again when function is over
+	defer func() {
+		fmt.Printf("\033[?25h");
+	}();
+	//hide cursor
+	fmt.Printf("\033[?25l");
+	pi.render(false, cursor)
+	escaped := false
+	kb.Listen(func(key keys.Key) (stop bool, err error) {
+		if key.Code == keys.Right {
+			cursor = pi.move_cursor(cursor, true);
+			pi.render(true, cursor);
+			return false, nil;
+		} else if key.Code == keys.Left {
+			cursor = pi.move_cursor(cursor, false);
+			pi.render(true, cursor);
+			return false, nil;
+		} else if key.Code == keys.Escape {
+			escaped = true;
+			return true, nil;
+		} else if key.Code == keys.Up {
+			pi.render(!cursor.plus(), cursor);
+			return false, nil;
+		} else if key.Code == keys.Down {
+			pi.render(!cursor.minus(), cursor);
+			return false, nil;
+		}
+		return false, nil;
+	});
+	return escaped;
+}
+
+func (pi *pipe_list) move_cursor(cursor *pipe, right bool) *pipe {
+	if right {
+		if cursor.next == nil {
+			cursor = pi.head;
+		} else {
+			cursor = cursor.next;
+		}
+	} else {
+		if cursor.last == nil {
+			cursor = pi.tail;
+		} else {
+			cursor = cursor.last;
+		}
 	}
-	fmt.Println("\n\n");
+	return cursor;
+}
+
+func (pi *pipe_list) render(redraw bool, cursor *pipe) {
+	if redraw {
+		fmt.Printf("\r");
+	} else {
+		fmt.Printf("\r\n\n");
+	}
+
+	cursor_style := col.HiGreen;
+	adjacent_style := col.Cyan;
+	
+	var i int = 0;
+	for p:= pi.head;; p = p.next {
+		if p == cursor.last || p == cursor.next {
+			adjacent_style.Printf("%c", graphics[p.state]);
+		} else if p == cursor {
+			cursor_style.Printf("%c", graphics[p.state]);
+		} else {
+			fmt.Printf("%c", graphics[p.state]);
+		}
+		i++;
+		if p == pi.tail { break }
+	}
 }
 
 func new_pipe_list(s uint8) pipe_list {
@@ -75,7 +126,7 @@ func new_pipe_list(s uint8) pipe_list {
 	}
 }
 
-func (p *pipe) plus() {
+func (p *pipe) plus() bool {
 	dummy := pipe{state: 1}
 	var next *pipe;
 	var last *pipe;
@@ -89,10 +140,13 @@ func (p *pipe) plus() {
 		p.state++;
 		next.state--;
 		last.state--;
+		return true;
+	} else {
+		return false;
 	}
 }
 
-func (p *pipe) minus() {
+func (p *pipe) minus() bool {
 	dummy := pipe{state: 1}
 	var next *pipe;
 	var last *pipe;
@@ -106,5 +160,8 @@ func (p *pipe) minus() {
 		p.state--;
 		next.state++;
 		last.state++;
+		return true;
+	} else {
+		return false;
 	}
 }

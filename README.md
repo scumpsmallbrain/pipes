@@ -2,7 +2,7 @@
 
 ![pipes](https://github.com/scumpsmallbrain/pipes/assets/136015437/774716d5-2b81-405d-93d5-5d660fd989d5)
 
-*v0.0.3*
+*v0.1.0*
 
 pipe problem is a logic puzzle devised by my buddy will. there are 7 pipes. each pipe can be empty, represented by 0, half-full, represented by 1, or full, represented by 2.
 
@@ -10,12 +10,12 @@ you can fill a pipe, sending it up one number, but you must subtract 1 from each
 
 the goal is to get all pipes to be half-full.
 
-## commands:
+## controls:
 
 ```
-<a>+	-- add liquid to a pipe, where <a> = the letter of the pipe
-<a>-	-- remove liquid from a pipe
-q		-- quit game
+left/right arrow keys: move cursor
+up: add to pipe
+down: subtract from pipe 
 ```
 
 ## technical details
