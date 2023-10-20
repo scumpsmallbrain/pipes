@@ -2,8 +2,7 @@
 
 ![pipes](https://github.com/scumpsmallbrain/pipes/assets/136015437/774716d5-2b81-405d-93d5-5d660fd989d5)
 
-
-*v0.0.1*
+*v0.0.3*
 
 pipe problem is a logic puzzle devised by my buddy will. there are 7 pipes. each pipe can be empty, represented by 0, half-full, represented by 1, or full, represented by 2.
 
@@ -21,8 +20,11 @@ q		-- quit game
 
 ## technical details
 
-a windows x86 build is included in the repo. you can compile to your own machine with the go compiler or run with `$ go run .`
+now with working binaries! still raises windows defender warnings i'll work on that lol.
 
+if you have the go compiler installed, you can build with `$ go build` or run with `$ go run .`
+
+only tested on windows so far
 
 
 ---
